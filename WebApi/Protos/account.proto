@@ -1,0 +1,65 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "WebApi";
+
+// Classes
+service AccountService {
+	// Methods
+	rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
+	rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+	rpc Exists (CheckExistsRequest) returns (CheckExistsResonse);
+}
+
+// Models
+message Account {
+	string id = 1;
+	string userName = 2;
+	string email = 3;
+	string phoneNumber = 4;
+}
+message Profile {
+	string id = 1;
+	string userName = 2;
+	string email = 3;
+	string phoneNumber = 4;
+	Address address = 5;
+}
+message Address {
+	string id = 1;
+	string street = 2;
+	string zip = 3;
+	string city = 4;
+	string country = 5;
+}
+
+// Create
+message CreateAccountRequest {
+	string email = 1;
+	string password = 2;
+}
+message CreateAccountResponse {
+	bool success = 1;
+	string message = 2;
+}
+
+// Read
+message GetAccountRequest {
+	string email = 1;
+	string password = 2;
+}
+message GetAccountResponse {
+	bool success = 1;
+	string message = 2;
+	Profile profile = 3;
+	repeated string roles = 4;
+	string token = 5;
+}
+
+// Check
+message CheckExistsRequest {
+	string email = 1;
+}
+message CheckExistsResonse {
+	bool success = 1;
+	string message = 2;
+}
