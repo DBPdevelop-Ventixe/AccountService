@@ -1,3 +1,5 @@
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,19 +12,35 @@ using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// KeyVault configuration
+var keyVaultUri = new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/");
+
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddAzureKeyVault(
+        keyVaultUri,
+        new DefaultAzureCredential(),
+        new AzureKeyVaultConfigurationOptions()
+        {
+            Manager = new CustomSecretManager("Ventixe"),
+            ReloadInterval = TimeSpan.FromMinutes(5)
+        }
+    );
+}
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddGrpc();
 
-builder.Services.AddTransient<UserService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AccountDbConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlDbConnection")));
 
 // Configure Identity
 builder.Services.AddIdentity<AccountEntity, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
-    //options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;

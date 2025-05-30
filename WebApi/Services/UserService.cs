@@ -47,21 +47,30 @@ public class UserService(UserManager<AccountEntity> userManager, IConfiguration 
             };
         }
 
+        // Add user role to this account
+        await _userManager.AddToRoleAsync(account, "User");
+
         // Create the profile
         var profileRequest = new AddEmptyProfileRequest
         {
             UserId = account.Email
         };
         var profileResponse = await _profileService.AddEmptyProfileAsync(profileRequest);
-        Console.WriteLine($"! - Tried to create an profile for userId: {account.Email}. Result: {profileResponse}");
+        Console.WriteLine($"Action - Tried to create an profile for userId: {account.Email}. Result: {profileResponse}");
 
-        // Add user role to this account
-        await _userManager.AddToRoleAsync(account, "User");
+
+        // Token
+        var response = await GetAccount(new GetAccountRequest
+        {
+            Email = account.Email,
+            Password = request.Password
+        }, context);
 
         return new CreateAccountResponse
         {
             Success = result.Succeeded,
             Message = "Account created successfully",
+            Token = response.Token
         };
     }
 
