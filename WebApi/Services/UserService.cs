@@ -25,6 +25,9 @@ public class UserService(UserManager<AccountEntity> userManager, IConfiguration 
             Email = request.Email
         };
 
+        // Set email confirmation
+        account.EmailConfirmed = true;
+
         // Check if the account already exists
         var userExists = await _userManager.FindByEmailAsync(account.Email);
         if (userExists != null)
